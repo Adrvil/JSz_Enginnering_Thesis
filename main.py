@@ -5,7 +5,6 @@ import time
 
 measurementQueue = Queue()
 
-#Arduino reader
 ar = ArduinoReader()
 sim = Simulator()
 sim.startSim()
@@ -27,14 +26,15 @@ def dataProcessing():
             dataForSim[i] = arduinoAngles[i] - lastAngles[i]
             lastAngles[i] = arduinoAngles[i]
 
+        #Adding force1 and force2 values to array
         dataForSim.extend([measurement[3], measurement[4]])
-
         sim.oneTick(dataForSim)
       
 timeLimit = 600 #in seconds
 
 ts = time.time()
 
+#Program works for 10 minutes until finished 
 while(time.time() - ts < timeLimit):
     try:
         auxReader()
