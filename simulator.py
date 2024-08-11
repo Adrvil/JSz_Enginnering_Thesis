@@ -3,40 +3,51 @@ from vpython.no_notebook import stop_server
 from math import radians
 
 class Simulator():
+    #Auxiliary variables
     gripper = False
     counter = 0
     rotateAll = False
+
+    #Setting scene and text in visualization
     scene = canvas(align = "left", width = 400, height = 600)
     gripText = wtext(pos = scene.title_anchor, text = "Chwytak jest w pozycji: <b>Otwartej</b>")
 
     def __init__(self):
+        #Variables for dragging method
         self.drag = False
         self.mouseOrigin = vec(0, 0, 0)
 
+        #Setting scene background color and deleting points of light
         self.scene.background = vec(1, 1, 1)
         self.scene.ambient = vec(1, 1, 1)
         self.scene.lights = []
-        
+
+        #Setting colors for each section
         self.colorBase = vec(128.0/255.0, 128.0/255.0, 128.0/255.0)
         self.colorElemC1 = vec(243.0/255.0, 12.0/255.0, 12.0/255.0)
         self.colorElemB2 = vec(12.0/255.0, 230.0/255.0, 12.0/255.0)
         self.colorElemB3 = vec(12.0/255.0, 12.0/255.0, 243.0/255.0)
 
+        #Creating base
         sceneBaseShaft = cylinder(pos = vec(0, 0, 0), axis = vec(0, 5, 0), radius = 1, opacity = 0.2, color = self.colorBase)
         sceneBaseBall = sphere(pos = vec(0, 6, 0), radius = 2, opacity = 0.2, color = self.colorBase)
 
+        #Creating method for dragging
         self.scene.bind('mousedown', self.down)
         self.scene.bind('mousemove', self.move)
         self.scene.bind('mouseup', self.up)
 
+    #Method when hold down left mouse button on canvas
     def down(self):
         self.drag = True
         self.mouseOrigin = self.scene.mouse.pos
 
+    #Method when move mouse cursor on cavas
     def move(self):
         if self.drag: # mouse button is down
             self.scene.camera.pos = self.scene.camera.pos - 0.1 * (self.scene.mouse.pos - self.mouseOrigin)
 
+    #Method when release left mouse button on canvas
     def up(self):
         self.drag = False
 
@@ -75,10 +86,12 @@ class Simulator():
         elemA.pos = vec(0, 20, 0)
         #elemA.rotate(angle = pi/4, axis = vec(0, 1, 0), origin = elemA.pos)
 
+        #Create fourth element for trail
         tpc = sphere(pos = vec(3, 27, 0), radius = 1, opacity = 0.1)
 
         return [elemC, elemB, elemA, tpc]
 
+    #Method that rotate all components relative to a 0, 0, 0 point
     def rotationLocal(self, joints, angles):
         joints[2].rotate(angle = angles[2], axis = joints[0].up, origin = joints[2].pos)
         joints[3].rotate(angle = angles[2], axis = joints[0].up, origin = joints[2].pos)
@@ -92,6 +105,7 @@ class Simulator():
         joints[2].rotate(angle = angles[0], axis = joints[0].axis, origin = joints[0].pos)
         joints[3].rotate(angle = angles[0], axis = joints[0].axis, origin = joints[0].pos)       
 
+    #Debug method
     def rotationAll(self, b):
         self.rotateAll = not self.rotateAll
         if self.rotateAll:
@@ -110,10 +124,12 @@ class Simulator():
             self.anglesDtLocal = [0.76 * self.dt, 1.3 * self.dt, 2.1 * self.dt] #radians
             self.mulMatrixLocal = [1, 1, 1]
 
+        #Making trail point and starting tracking
         trailLocal = attach_trail(self.jointsLocal[3], type = 'curve', radius = 0.1, color = vec(0, 0, 0), retain = 10)
         trailLocal.start()
 
     def oneTick(self, angles):
+        #Visualization frame rate
         rate(1/self.dt)
             
         if __name__ == "__main__":
@@ -129,13 +145,13 @@ class Simulator():
                 for i in range(0, 3):
                     self.anglesLocal[i] = self.anglesLocal[i] + self.anglesDtLocal[i]
                         
-                #print(self.anglesLocal[2])
                 self.rotationLocal(self.jointsLocal, self.anglesDtLocal)
 
         self.rotationLocal(self.jointsLocal, [-radians(angles[0]), radians(angles[1]), radians(angles[2])])
 
-        print(f"Angles3: {angles[3]}; Angles4: {angles[4]}")
+        #print(f"Angles3: {angles[3]}; Angles4: {angles[4]}")
 
+        #Checking if user open wide his/her hand
         if angles[3] >= 500 and angles[4] >= 550 and self.counter > 10:
             self.gripper = not self.gripper
             self.counter = 0
