@@ -4,18 +4,18 @@ class ArduinoReader:
     def __init__(self):
         self.serialInst = serial.Serial()
 
-        #Get list of used ports
+        #Getting list of used ports
         ports = serial.tools.list_ports.comports()
         portList = []
 
-        #Print all of used ports
+        #Printing all of used ports
         for onePort in ports:
             portList.append(str(onePort))
             print(str(onePort))
 
         val = input("Select port: COM")
 
-        #Check for port that match the user input
+        #Checking for port that match the user input
         for x in range(0, len(portList)):
             if portList[x].startswith("COM" + str(val)):
                 portVar = "COM" + str(val)
@@ -26,7 +26,7 @@ class ArduinoReader:
         self.serialInst.port = portVar
         self.serialInst.open()
 
-    #Read one line from Serial buffer
+    #Reading one line from Serial buffer
     def readLine(self, queue_):
         try:
             #angX;angY;angZ;force1;force2
